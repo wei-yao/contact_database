@@ -1,10 +1,14 @@
 package com.example.database;
   
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;  
 import java.sql.DriverManager;  
 import java.sql.PreparedStatement;  
 import java.sql.ResultSet;  
 import java.sql.SQLException;  
+import java.util.Properties;
   
 import javax.naming.Context;  
 import javax.naming.InitialContext;  
@@ -17,9 +21,9 @@ public class DBCon {
     //数据库连接地址(数据库名)  
     public static final String URL="jdbc:oracle:thin:@localhost:1521:orcl";  
     //登陆名  
-    public static final String USER="SCOTT";  
+    private static String USER="SCOTT";  
     //登陆密码  
-    public static final String PWD="123456";  
+    private  static  String PWD="TIGER";  
     //创建数据库连接对象  
     private Connection con=null;  
     //创建数据库预编译对象  
@@ -34,13 +38,39 @@ public class DBCon {
     	con=getCon();
     }
     public static DBCon getInstance(){
+    		readUserNamePass();
     	if(dbCon==null){
     		dbCon=new DBCon();
     	}
     	return dbCon;
     }
     
-        /**  
+        private static void readUserNamePass() {
+        	Properties prop = new Properties();
+        	InputStream input = null;
+        	try {
+        		input = new FileInputStream("config.properties");
+        		// load a properties file
+        		prop.load(input);
+        		// get the property value and print it out
+        		USER=prop.getProperty("username");
+        		PWD=prop.getProperty("password");
+//        		System.out.println(USER);
+//        		System.out.println(PWD);
+        			
+        	} catch (IOException ex) {
+        		ex.printStackTrace();
+        	} finally {
+        		if (input != null) {
+        			try {
+        				input.close();
+        			} catch (IOException e) {
+        				e.printStackTrace();
+        			}
+        		}
+        	}
+        }
+		/**  
          * 获取数据库连接  
          */  
         public Connection getCon(){  

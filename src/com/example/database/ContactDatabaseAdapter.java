@@ -1,9 +1,12 @@
 package com.example.database;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
 
 /**
  * 用于联系人和数据库的操作.
@@ -23,47 +26,52 @@ public class ContactDatabaseAdapter {
 				+ " NUMBER(7) PRIMARY KEY, " + ContactEntry.NAME
 				+ " VARCHAR2(20) not null, " + ContactEntry.PHONE
 				+ " VARCHAR2(30) not null ) ";
-		private static final String SEQ_NAME = "SEQ_CONTACTS";
+		static final String SEQ_NAME = "SEQ_CONTACTS";
 	}
+
 	/**
 	 * 删除所有的表和数据.
 	 */
-	private static void deleteAll(){
+	private static void deleteAll() {
 		deleteAllTable();
 		deleteAllSequences();
 	}
+
 	private static void deleteAllSequences() {
-		String sql1="DROP SEQUENCE "+ContactEntry.SEQ_NAME;
-		String sql2="DROP SEQUENCE "+GroupEntry.SEQ_NAME;
-		String sql3="DROP SEQUENCE "+ContactGroupEntry.SEQ_NAME;
+		String sql1 = "DROP SEQUENCE " + ContactEntry.SEQ_NAME;
+		String sql2 = "DROP SEQUENCE " + GroupEntry.SEQ_NAME;
+		String sql3 = "DROP SEQUENCE " + ContactGroupEntry.SEQ_NAME;
 		try {
 			DBCon.getInstance().update(sql1, null);
 			DBCon.getInstance().update(sql2, null);
-			DBCon.getInstance().update(sql3,null);
+			DBCon.getInstance().update(sql3, null);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
+
 	private static void deleteAllTable() {
-		String sql1="drop table  "+ContactEntry.TABLE_NAME;
-		String sql2="drop table "+GroupEntry.TABLE_NAME;
-		String sql3="drop table "+ContactGroupEntry.TABLE_NAME;
+		String sql1 = "drop table  " + ContactEntry.TABLE_NAME;
+		String sql2 = "drop table " + GroupEntry.TABLE_NAME;
+		String sql3 = "drop table " + ContactGroupEntry.TABLE_NAME;
 		try {
 			DBCon.getInstance().update(sql3, null);
 			DBCon.getInstance().update(sql2, null);
-			DBCon.getInstance().update(sql1,null);
+			DBCon.getInstance().update(sql1, null);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
+
 	public abstract static class GroupEntry {
 		public static final String TABLE_NAME = "GROUP_TABLE";
 		public static final String _ID = "ID";
 		public static final String NAME = "NAME";
 		private static final String CREATE_TABLE = "create table " + TABLE_NAME
 				+ " (" + _ID + " NUMBER(7) PRIMARY KEY," + NAME
-				+ " VARCHAR2(20) not null, CONSTRAINT name_unique UNIQUE ("+NAME+") )";
-		private static final String SEQ_NAME = "SEQ_GROUP";
+				+ " VARCHAR2(20) not null, CONSTRAINT name_unique UNIQUE ("
+				+ NAME + ") )";
+		static final String SEQ_NAME = "SEQ_GROUP";
 	}
 
 	public abstract static class ContactGroupEntry {
@@ -102,10 +110,12 @@ public class ContactDatabaseAdapter {
 			DBCon.getInstance().update(sql, null);
 		}
 	}
-/**
- *  删除旧表,初始化表和数据.
- * @throws SQLException
- */
+
+	/**
+	 * 删除旧表,初始化表和数据.
+	 * 
+	 * @throws SQLException
+	 */
 	public static void setUp() throws SQLException {
 		deleteAll();
 		createTables();
@@ -165,6 +175,28 @@ public class ContactDatabaseAdapter {
 		return ret;
 	}
 
+	/**
+	 * 制定id的插入.
+	 * 
+	 * @param name
+	 * @param phone
+	 * @param id
+	 * @return
+	 * @throws SQLException
+	 */
+	public static long insertContact(String name, String phone, long id)
+			throws SQLException {
+		String sql = "insert into " + ContactEntry.TABLE_NAME + " ("
+				+ ContactEntry._ID + " , " + ContactEntry.NAME + ","
+				+ ContactEntry.PHONE + ") values ( ?,?,?)";
+		String[] params = new String[] { id + "", name, phone };
+		long ret = -1;
+		if (DBCon.getInstance().update(sql, params) > 0) {
+			ret = id;
+		}
+		return ret;
+	}
+
 	public static long insertGroup(String name) throws SQLException {
 		String sql = "insert into " + GroupEntry.TABLE_NAME + " ("
 				+ GroupEntry._ID + "," + GroupEntry.NAME + ") values ( "
@@ -176,66 +208,102 @@ public class ContactDatabaseAdapter {
 		}
 		return ret;
 	}
+	public static long insertGroup(String name,long id) throws SQLException {
+		String sql = "insert into " + GroupEntry.TABLE_NAME + " ("
+				+ GroupEntry._ID + "," + GroupEntry.NAME + ") values ( ? ,?)";
+		String[] params = new String[] { id+"",name };
+		long ret = -1;
+		if (DBCon.getInstance().update(sql, params) > 0) {
+			ret = id;
+		}
+		return ret;
+	}
 	/**
 	 * 修改联系人
-	 * @param contacter 联系人结构体，只修改值不为null的域.
-	 * @throws SQLException 
+	 * 
+	 * @param contacter
+	 *            联系人结构体，只修改值不为null的域.
+	 * @throws SQLException
 	 */
-	public static void updateContacter(Contacter contacter) throws SQLException{
-		ArrayList<String> columns=new ArrayList<String>();
-		if(contacter.name!=null)
-//			columns.add(ContactEntry.NAME);
+	public static void updateContacter(Contacter contacter) throws SQLException {
+		ArrayList<String> columns = new ArrayList<String>();
+		if (contacter.name != null)
+		// columns.add(ContactEntry.NAME);
 		{
 			updateName(contacter);
 		}
-			if(contacter.phone!=null)
-			{
-				updatePhone(contacter);
-			}
-			if(contacter.groupList!=null){
-				updateContactGroup(contacter);
-			}
-//			columns.add(ContactEntry.PHONE);
-			{
-				
-			}
-				//		if(!columns.isEmpty())
-//		{
-//			String sql="update "+ContactEntry.TABLE_NAME+" set "
-//		}
+		if (contacter.phone != null) {
+			updatePhone(contacter);
+		}
+		if (contacter.groupList != null) {
+			updateContactGroup(contacter);
+		}
+		// columns.add(ContactEntry.PHONE);
+		{
+
+		}
+		// if(!columns.isEmpty())
+		// {
+		// String sql="update "+ContactEntry.TABLE_NAME+" set "
+		// }
 	}
-	private static void updateContactGroup(Contacter contacter) throws SQLException {
-//		ArrayList<Long> originGroupIds=getGroupsId(contacter.id);
+
+	private static void updateContactGroup(Contacter contacter)
+			throws SQLException {
+		// ArrayList<Long> originGroupIds=getGroupsId(contacter.id);
 		deleteOldRelations(contacter.id);
-		for(long groupId:contacter.groupIdList){
-//			if(originGroupIds.contains(groupId)){
-//				updateContactGroup(contacter.id,groupId);
-//			}else{
-				insertContactGroup(contacter.id, groupId);
-//			}
+		if(!contacter.groupIdList.isEmpty()){
+		for (long groupId : contacter.groupIdList) {
+			// if(originGroupIds.contains(groupId)){
+			// updateContactGroup(contacter.id,groupId);
+			// }else{
+			insertContactGroup(contacter.id, groupId);
+			// }
+		}
+		}else {
+			for(String name:contacter.groupList){
+				long id=getGroupId(name);
+				if(id!=-1){
+					insertContactGroup(contacter.id, id);
+				}
+			}
 		}
 	}
+
 	private static void deleteOldRelations(long id) throws SQLException {
-		String sql="delete from "+ContactGroupEntry.TABLE_NAME+" where "+ContactGroupEntry.USER_ID+"=?";
-		DBCon.getInstance().update(sql, id+"");
+		String sql = "delete from " + ContactGroupEntry.TABLE_NAME + " where "
+				+ ContactGroupEntry.USER_ID + "=?";
+		DBCon.getInstance().update(sql, id + "");
 	}
-	public static void deleteContacter(long id) throws SQLException{
+
+	public static void deleteContacter(long id) throws SQLException {
 		deleteOldRelations(id);
 		deleteContactRows(id);
-		
+
 	}
+
 	private static void deleteContactRows(long id) throws SQLException {
-		String sql="delete from "+ContactEntry.TABLE_NAME+" where "+ContactEntry._ID+"=?";
-		DBCon.getInstance().update(sql, id+"");
+		String sql = "delete from " + ContactEntry.TABLE_NAME + " where "
+				+ ContactEntry._ID + "=?";
+		DBCon.getInstance().update(sql, id + "");
 	}
+
+	
+
 	private static void updatePhone(Contacter contacter) throws SQLException {
-		String sql="update "+ContactEntry.TABLE_NAME+" set "+ContactEntry.PHONE+"=? where "+ContactEntry._ID+"=?";
-		DBCon.getInstance().update(sql, new String[]{contacter.phone,contacter.id+""});
+		String sql = "update " + ContactEntry.TABLE_NAME + " set "
+				+ ContactEntry.PHONE + "=? where " + ContactEntry._ID + "=?";
+		DBCon.getInstance().update(sql,
+				new String[] { contacter.phone, contacter.id + "" });
 	}
+
 	private static void updateName(Contacter contacter) throws SQLException {
-		String sql="update "+ContactEntry.TABLE_NAME+" set "+ContactEntry.NAME+"=? where "+ContactEntry._ID+"=?";
-		DBCon.getInstance().update(sql, new String[]{contacter.name,contacter.id+""});
+		String sql = "update " + ContactEntry.TABLE_NAME + " set "
+				+ ContactEntry.NAME + "=? where " + ContactEntry._ID + "=?";
+		DBCon.getInstance().update(sql,
+				new String[] { contacter.name, contacter.id + "" });
 	}
+
 	/**
 	 * 插入联系人 群组关系表.
 	 * 
@@ -256,20 +324,68 @@ public class ContactDatabaseAdapter {
 		}
 		return ret;
 	}
+
 	/**
 	 * 初始化插入数据.
-	 * @throws SQLException 
+	 * 
+	 * @throws SQLException
 	 */
-	private static void initializeData() throws SQLException{
-		String[] groupNames =new String[]{"同学","实验室","同乡"};
-		ArrayList<Long> groupIds=new ArrayList<Long>();
-		for(String groupName:groupNames){
+	private static void initializeData() throws SQLException {
+		String[] groupNames = new String[] { "同学", "实验室", "同乡" };
+		ArrayList<Long> groupIds = new ArrayList<Long>();
+		for (String groupName : groupNames) {
 			groupIds.add(insertGroup(groupName));
 		}
-		insertContact("小强", "18400001234", new long[]{groupIds.get(0),groupIds.get(1)});
-		insertContact("小红", "13400005875", new long[]{groupIds.get(0),groupIds.get(1)});
-		insertContact("小明", "18700007584", new long[]{groupIds.get(0),groupIds.get(2)});
-		insertContact("小刚", "13700003785", new long[]{groupIds.get(0),groupIds.get(2)});
+		insertContact("小强", "18400001234", new long[] { groupIds.get(0),
+				groupIds.get(1) });
+		insertContact("小红", "13400005875", new long[] { groupIds.get(0),
+				groupIds.get(1) });
+		insertContact("小明", "18700007584", new long[] { groupIds.get(0),
+				groupIds.get(2) });
+		insertContact("小刚", "13700003785", new long[] { groupIds.get(0),
+				groupIds.get(2) });
+	}
+	/**
+	 * 返回group表全体，包括id.
+	 * @return
+	 * @throws SQLException
+	 */
+	public static ArrayList<HashMap<String,Object>> getGroupData() throws SQLException {
+		ArrayList<HashMap<String,Object>> ret = new ArrayList<HashMap<String,Object>>();
+		String sql = "select " + GroupEntry._ID+", "+GroupEntry.NAME + " from "
+				+ GroupEntry.TABLE_NAME;
+
+		ResultSet rs = null;
+		try {
+			rs = DBCon.getInstance().query(sql, null);
+			while (rs.next()) {
+				HashMap<String,Object> tmp=new HashMap<String, Object>();
+				tmp.put(GroupEntry._ID, rs.getLong(1));
+				tmp.put(GroupEntry.NAME, rs.getString(2));
+				ret.add(tmp);
+			}
+		} finally {
+			if (rs != null)
+				rs.close();
+		}
+		return ret;
+	}
+	public static ArrayList<String> getGroupList() throws SQLException {
+		ArrayList<String> ret = new ArrayList<String>();
+		String sql = "select " + GroupEntry.NAME + " from "
+				+ GroupEntry.TABLE_NAME;
+
+		ResultSet rs = null;
+		try {
+			rs = DBCon.getInstance().query(sql, null);
+			while (rs.next()) {
+				ret.add(rs.getString(1));
+			}
+		} finally {
+			if (rs != null)
+				rs.close();
+		}
+		return ret;
 	}
 
 	public static ArrayList<Contacter> getContacterList() throws SQLException {
@@ -277,7 +393,7 @@ public class ContactDatabaseAdapter {
 		String name;
 		String phone;
 		long userId;
-		ArrayList<Contacter> ret=new ArrayList<Contacter>();
+		ArrayList<Contacter> ret = new ArrayList<Contacter>();
 		try {
 			rs = getContacters();
 			while (rs.next()) {
@@ -285,7 +401,7 @@ public class ContactDatabaseAdapter {
 				phone = rs.getString(ContactEntry.PHONE);
 				userId = rs.getLong(ContactEntry._ID);
 				ArrayList<String> groups = getCroups(userId);
-				ret.add(new Contacter(name, phone, groups,userId));
+				ret.add(new Contacter(name, phone, groups, userId));
 			}
 		} finally {
 			if (rs != null)
@@ -296,25 +412,26 @@ public class ContactDatabaseAdapter {
 
 	private static ArrayList<String> getCroups(long userId) throws SQLException {
 		ArrayList<Long> groupIds = getGroupsId(userId);
-		ArrayList<String >ret=new ArrayList<String>();
-		for(long id:groupIds){
+		ArrayList<String> ret = new ArrayList<String>();
+		for (long id : groupIds) {
 			ret.add(getGroupName(id));
 		}
 		return ret;
 	}
 
 	private static String getGroupName(long id) throws SQLException {
-		String ret="";
-		String sql="select "+GroupEntry.NAME+" from "+GroupEntry.TABLE_NAME+" where "+GroupEntry._ID+"=?";
-		ResultSet rs=null;
-		try{
-			rs=DBCon.getInstance().query(sql, id+"");
-			if(rs.next()){
-				ret=rs.getString(1);
+		String ret = "";
+		String sql = "select " + GroupEntry.NAME + " from "
+				+ GroupEntry.TABLE_NAME + " where " + GroupEntry._ID + "=?";
+		ResultSet rs = null;
+		try {
+			rs = DBCon.getInstance().query(sql, id + "");
+			if (rs.next()) {
+				ret = rs.getString(1);
 			}
-		}finally{
-			if(rs!=null)
-			rs.close();
+		} finally {
+			if (rs != null)
+				rs.close();
 		}
 		return ret;
 	}
@@ -365,8 +482,104 @@ public class ContactDatabaseAdapter {
 		}
 	}
 
+	/**
+	 * 比较显示的数据和数据库中的数据的不同，差分后做删除，插入，修改等操作.
+	 * 
+	 * @throws SQLException
+	 */
+	public static void CommitChange(ArrayList<Contacter> data)
+			throws SQLException {
+		ArrayList<Contacter> originData = getContacterList();
+		HashMap<Long, Contacter> originMap = new HashMap<Long, Contacter>();
+		// HashMap<Long,Contacter> dataMap=new HashMap<Long,Contacter>();
+		// HashSet<Long > originIds=new HashSet<Long>();
+		// HashSet<Long> dataIds=new HashSet<Long>();
+		for (Contacter con : originData) {
+			// originIds.add(con.id);
+			originMap.put(con.id, con);
+		}
+		// for(Contacter con:data){
+		// // dataIds.add(con.id);
+		// dataMap.put(con.id, con);
+		// }
+		for (Contacter con : data) {
+			if (originMap.containsKey(con.id)) {
+				if (!(originMap.get(con.id).equals(con))) {
+					if (isCorrect(con)) {
+						updateContacter(con);
+					}
+				}
+				originMap.remove(con.id);
+			} else {
+				if (isCorrect(con)) {
+					handleInsert(con);
+				}
+			}
+		}
+		for(Entry<Long, Contacter> item:originMap.entrySet() ){
+			deleteContacter(item.getKey());
+		}
+		// for(long id: originIds){
+		// if(dataIds.contains(id)){
+		//
+		// }
+	}
+
+	private static void handleInsert(Contacter con) throws SQLException {
+		insertContact(con.name, con.phone, con.id);
+		for (String name : con.groupList) {
+			long groupId = getGroupId(name);
+			if(groupId!=-1)
+			insertContactGroup(con.id, groupId);
+		}
+	}
+
+	/**
+	 * 根据组名查询组id.
+	 * 
+	 * @param name
+	 * @return
+	 * @throws SQLException 
+	 */
+	private static long getGroupId(String name) throws SQLException {
+		String sql = "select " + GroupEntry._ID + " from "
+				+ GroupEntry.TABLE_NAME + " where " + GroupEntry.NAME + "=?";
+		ResultSet rs=null;
+		long ret=-1;
+		try{
+		rs=DBCon.getInstance().query(sql, name);
+		if(rs.next())
+			ret=rs.getLong(1);
+		}finally{
+			if(rs!=null)
+				rs.close();
+		}
+		return ret;
+	}
+
+	/**
+	 * 判断联系人条目是否正确.
+	 * 
+	 * @param con
+	 * @return
+	 */
+	private static boolean isCorrect(Contacter con) {
+		if (isTextEmpty(con.name) || isTextEmpty(con.phone))
+			return false;
+		return true;
+	}
+
+	public static boolean isTextEmpty(String str) {
+		return (str == null || str.equals(""));
+	}
+
 	private static void createContactsTable() throws SQLException {
 		createTableIfnotExists(ContactEntry.TABLE_NAME,
 				ContactEntry.CREATE_TABLE);
+	}
+
+	public static void CommitGroupChange(ArrayList<HashMap<String, Object>> data) {
+		
+	
 	}
 }

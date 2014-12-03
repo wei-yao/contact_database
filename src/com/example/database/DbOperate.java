@@ -2,6 +2,9 @@ package com.example.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.example.database.ContactDatabaseAdapter.ContactEntry;
+import com.example.database.ContactDatabaseAdapter.GroupEntry;
+
 
 
 public class DbOperate {
@@ -31,6 +34,34 @@ public class DbOperate {
 				rs.close();
 		}
 		
+	}
+	public static long getNextContacterId() throws SQLException {
+		String sql = "select " + ContactEntry.SEQ_NAME + ".nextval from  dual";
+		ResultSet rs = null;
+		long ret = -1;
+		try {
+			rs = DBCon.getInstance().query(sql, null);
+			if (rs.next())
+				ret = rs.getLong(1);
+		} finally {
+			if (rs != null)
+				rs.close();
+		}
+		return ret;
+	}
+	public static long getNextGroupId() throws SQLException {
+		String sql = "select " + GroupEntry.SEQ_NAME + ".nextval from  dual";
+		ResultSet rs = null;
+		long ret = -1;
+		try {
+			rs = DBCon.getInstance().query(sql, null);
+			if (rs.next())
+				ret = rs.getLong(1);
+		} finally {
+			if (rs != null)
+				rs.close();
+		}
+		return ret;
 	}
 	public static long getCurrSeq(String name) throws SQLException{
 //		String sql="select last_number from user_sequences where sequence_name=?";

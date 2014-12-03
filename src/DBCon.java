@@ -27,22 +27,18 @@ public class DBCon {
     private ResultSet rs=null;  
     //创建数据源对象  
     public static DataSource source=null;  
-  
-//  //静态代码块  
-//  static{  
-//  
-//      //初始化配置文件context  
-//      try {  
-//          Context context=new InitialContext();  
-//          source=(DataSource)context.lookup("java:comp/env/jdbc/webmessage");  
-//      } catch (Exception e) {  
-//          // TODO Auto-generated catch block  
-//          e.printStackTrace();  
-//      }  
-//  
-//  
-//  }  
-  
+//    private static Object lock=new Object();
+    private static DBCon dbCon;
+    private DBCon(){
+    	con=getCon();
+    }
+    public static DBCon getInstance(){
+    	if(dbCon==null){
+    		dbCon=new DBCon();
+    	}
+    	return dbCon;
+    }
+    
         /**  
          * 获取数据库连接  
          */  
@@ -50,13 +46,13 @@ public class DBCon {
             try {  
                 Class.forName(DRIVER);  
             } catch (ClassNotFoundException e) {  
-                // TODO Auto-generated catch block  
+                  
                 e.printStackTrace();  
             }  
             try {  
                 con=DriverManager.getConnection(URL,USER,PWD);  
             } catch (SQLException e) {  
-                // TODO Auto-generated catch block  
+                  
                 e.printStackTrace();  
             }  
               
@@ -70,61 +66,78 @@ public class DBCon {
 //      try {  
 //          con=source.getConnection();  
 //      } catch (SQLException e) {  
-//          // TODO Auto-generated catch block  
+//            
 //          e.printStackTrace();  
 //      }  
 //  
 //      return con;  
 //  }  
   
-  
+  //查询的话只关闭了rs
     /**  
      * 关闭所有资源  
      */  
-    public void closeAll(){  
+    public void closeRes(){  
         if(rs!=null)  
             try {  
                 rs.close();  
             } catch (SQLException e) {  
-                // TODO Auto-generated catch block  
+                  
                 e.printStackTrace();  
             }  
             if(ps!=null)  
                 try {  
                     ps.close();  
                 } catch (SQLException e) {  
-                    // TODO Auto-generated catch block  
+                      
                     e.printStackTrace();  
                 }  
-                if(con!=null)  
-                    try {  
-                        con.close();  
-                    } catch (SQLException e) {  
-                        e.printStackTrace();  
-                    }  
+//                if(con!=null)  
+//                    try {  
+//                        con.close();  
+//                    } catch (SQLException e) {  
+//                        e.printStackTrace();  
+//                    }  
   
   
     }  
+    public void closeAll(){
+    	closeRes();
+    	   if(con!=null)  
+             try {  
+                 con.close();  
+             } catch (SQLException e) {  
+                 e.printStackTrace();  
+             }  
+    	  dbCon=null;
+    }
+//   public void closeConnectionSafely(){
+//	   if(con)
+//   }
     /**  
      * @param sql数据库更新(增、删、改) 语句      
      * @param pras参数列表（可传，可不传，不传为NULL，以数组形式存在）  
      * @return 返回受影响都行数  
+     * @throws SQLException 
      */  
-    public int update(String sql,String... pras){  
+    public int update(String sql,String... pras) throws SQLException{  
         int resu=0;  
-        con=getCon();  
+//         con =getCon();  
         try {  
             ps=con.prepareStatement(sql);  
+            if(null!=pras){
             for(int i=0;i<pras.length;i++){  
                 ps.setString(i+1,pras[i]);  
             }  
-            resu=ps.executeUpdate();  
-        } catch (SQLException e) {  
-            // TODO Auto-generated catch block  
-            e.printStackTrace();  
-        }  
+            }
+            resu=ps.executeUpdate();
+        } 
+//        catch (SQLException e) {  
+//              
+//            e.printStackTrace();  
+//        }  
         finally{  
-            closeAll();  
+            closeRes();  
         }  
         return resu;  
     }  
@@ -133,10 +146,11 @@ public class DBCon {
      * @param sql数据库查询语句  
      * @param pras参数列表（可传，可不传，不传为NULL，以数组形式存在）  
      * @return 返回结果集  
+     * @throws SQLException 
      */  
-    public ResultSet query(String sql,String... pras){  
-        con=getCon();  
-        try {  
+    public ResultSet query(String sql,String... pras) throws SQLException{  
+//    	con=getCon();  
+//        try {  
             ps=con.prepareStatement(sql);  
   
             if(pras!=null)  
@@ -144,9 +158,12 @@ public class DBCon {
                     ps.setString(i+1, pras[i]);  
                 }  
             rs=ps.executeQuery();  
-        } catch (SQLException e) {  
-            e.printStackTrace();  
-        }  
+//        }finally{
+//        	closeAll();
+//        } 
+//        catch (SQLException e) {  
+//            e.printStackTrace();  
+//        }  
         return rs;  
     }  
   

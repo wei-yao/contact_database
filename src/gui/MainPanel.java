@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 
 import com.example.database.ContactDatabaseAdapter;
@@ -71,8 +72,11 @@ public class MainPanel extends JFrame {
 				goToGroupList();
 			}
 		});
-		pnlAll.add(contactBtn);
-		pnlAll.add(groupBtn);
+		pnlAll.add(contactBtn,BorderLayout.NORTH);
+		pnlAll.add(groupBtn,BorderLayout.NORTH);
+		JTextArea jta=new JTextArea("÷–ø∆¥Û ’‘Ë¥ SA14168162");
+		jta.setTabSize(20);
+		pnlAll.add(jta,BorderLayout.CENTER);
 		  add(pnlAll);
 //		    initialzieList();
 	        setSize(280, 210);

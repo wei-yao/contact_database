@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 
 /**
- * 用于联系人和数据库的操作.
+ * 用于联系人和数据库功能性的操作.
  * 
  * @author zhaolu
  * 
@@ -592,14 +592,18 @@ public class ContactDatabaseAdapter {
 			}
 		}
 		for(Entry<Long, HashMap<String, Object>> item :map.entrySet()){
+			
 			deleteGroupRows(item.getKey());
 		}
 	}
 
 	private static void deleteGroupRows(long id) throws SQLException {
-		String sql = "delete from " + GroupEntry.TABLE_NAME + " where "
-				+ GroupEntry._ID + "=?";
+		String sql = "delete from " + ContactGroupEntry.TABLE_NAME + " where "
+				+ ContactGroupEntry.GROUP_ID + "=?";
 		DBCon.getInstance().update(sql, id + "");
+		String sql2 = "delete from " + GroupEntry.TABLE_NAME + " where "
+				+ GroupEntry._ID + "=?";
+		DBCon.getInstance().update(sql2, id + "");
 	}
 
 	private static boolean isCorrect(HashMap<String, Object> item) {

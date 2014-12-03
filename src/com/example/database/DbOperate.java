@@ -6,7 +6,11 @@ import com.example.database.ContactDatabaseAdapter.ContactEntry;
 import com.example.database.ContactDatabaseAdapter.GroupEntry;
 
 
-
+/**
+ * Êý¾Ý¿â²Ù×÷.
+ * @author yao
+ *
+ */
 public class DbOperate {
 	public static boolean isTableExists(String tableName) throws SQLException{
 		if(tableName==null||"".equals(tableName))

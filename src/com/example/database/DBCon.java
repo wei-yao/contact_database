@@ -14,12 +14,16 @@ import javax.naming.Context;
 import javax.naming.InitialContext;  
 import javax.naming.NamingException;  
 import javax.sql.DataSource;  
-  
+ /**
+  * 用于数据库底层操作. 
+  * @author zhaolu
+  *
+  */
 public class DBCon {  
     //数据库驱动对象  
     public static final String DRIVER="oracle.jdbc.driver.OracleDriver";  
     //数据库连接地址(数据库名)  
-    public static final String URL="jdbc:oracle:thin:@localhost:1521:orcl";  
+    public static  String URL="jdbc:oracle:thin:@localhost:1521:orcl";  
     //登陆名  
     private static String USER="SCOTT";  
     //登陆密码  
@@ -55,6 +59,7 @@ public class DBCon {
         		// get the property value and print it out
         		USER=prop.getProperty("username");
         		PWD=prop.getProperty("password");
+        		URL=prop.getProperty("url");
 //        		System.out.println(USER);
 //        		System.out.println(PWD);
         			

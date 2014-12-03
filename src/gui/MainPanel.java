@@ -78,12 +78,13 @@ public class MainPanel extends JFrame {
 	        setSize(280, 210);
 	        setResizable(true);
 	        setLocationRelativeTo(null);
-	        setTitle("Visual Cryptography");
+	        setTitle("人际关系管理系统");
 	        setVisible(true);
 	        setDefaultCloseOperation(EXIT_ON_CLOSE);
 //	        listModel.addElement("Jane Doe");
 	  }
 protected void goToGroupList() {
+	GroupTable.createAndShowGUI(this);
 	}
 	//	  private void refreshData(ArrayList<String> data){
 //		  listModel.clear();

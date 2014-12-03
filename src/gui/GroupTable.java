@@ -66,9 +66,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /** 
- * TableRenderDemo is just like TableDemo, except that it
- * explicitly initializes column sizes and it uses a combo box
- * as an editor for the Sport column.
+ *显示群组的界面.
  */
 public class GroupTable extends JPanel {
     private boolean DEBUG = false;
@@ -109,12 +107,42 @@ public class GroupTable extends JPanel {
 //        data.add(new Contacter("yap", "123456", new ArrayList<String>(), 10));
     }
     private JButton confirmEdit=new JButton("确认修改"),cancelEdit=new JButton("取消修改");
-    private JButton addButton=new JButton("添加记录"),deleteButton=new JButton("删除记录");
+    private JButton addButton=new JButton("添加分组"),deleteButton=new JButton("删除分组");
+    private JButton  viewDetailBtn=new JButton("查看分组");
     private void initializeButton() {
     	 JPanel buttonPane = new JPanel();
          buttonPane.setLayout(new BoxLayout(buttonPane,
                                             BoxLayout.LINE_AXIS));
          buttonPane.add(addButton);
+         buttonPane.add(viewDetailBtn);
+         viewDetailBtn.addMouseListener(new MouseListener() {
+			
+			public void mouseReleased(MouseEvent e) {
+			}
+			
+			public void mousePressed(MouseEvent e) {
+			}
+			
+			public void mouseExited(MouseEvent e) {
+			}
+			
+			public void mouseEntered(MouseEvent e) {
+			}
+			
+			public void mouseClicked(MouseEvent e) {
+				int selRow=table.getSelectedRow();
+				if(selRow!=-1){
+					long groupId=(Long) tableModel.getValueAt(selRow, 0);
+					try {
+						GroupDetail.createAndShowGUI(null, groupId);
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}
+					
+				}
+		
+			}
+		});
         addButton.addMouseListener(new MouseListener() {
 			
 			public void mouseReleased(MouseEvent e) {
@@ -228,6 +256,13 @@ public class GroupTable extends JPanel {
          add(buttonPane, BorderLayout.PAGE_END);
          
 	}
+///**
+// * 跳转到查看特定组的联系人界面.
+// * @param groupId
+// */
+//	protected void goToDetail(long groupId) {
+//		GroupDetail.createAndShowGUI(null, groupId);
+//	}
 
 	private ArrayList<HashMap<String, Object>> getData() {
     	try {
@@ -306,6 +341,8 @@ public class GroupTable extends JPanel {
         }
 
         public Object getValueAt(int row, int col) {
+        	if(row>=data.size())
+         	   return "";
           return  data.get(row).get(columnNames[col]);
         }
 

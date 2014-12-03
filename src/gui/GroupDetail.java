@@ -51,6 +51,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import com.example.database.ContactDatabaseAdapter;
+import com.example.database.ContactDatabaseAdapter.ContactEntry;
 import com.example.database.Contacter;
 import com.example.database.DbOperate;
 
@@ -64,18 +65,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 /** 
- * TableRenderDemo is just like TableDemo, except that it
- * explicitly initializes column sizes and it uses a combo box
- * as an editor for the Sport column.
+ *查看某个组的所有联系人.
  */
-public class ContactTable extends JPanel {
+public class GroupDetail extends JPanel {
     private boolean DEBUG = false;
     private ArrayList<Contacter> data;
     private MyTableModel tableModel;
     private JTable table;
-    public ContactTable() {
+    private long groupId;
+    public GroupDetail(long gid, String groupName) {
 //        super(new GridLayout(1,0));
     	   super(new BorderLayout());
+    	   groupId=gid;
+    	   this.groupName=groupName;
 //        ArrayList<Contacter> ca=new ArrayList<Contacter>();
              data=getData();
 //        as.add("gaowei");
@@ -97,12 +99,12 @@ public class ContactTable extends JPanel {
 			e.printStackTrace();
 		}
         //Fiddle with the Sport column's cell editors/renderers.
-        setUpSportColumn(table, table.getColumnModel().getColumn(3),groupList);
-        setUpSportColumn(table, table.getColumnModel().getColumn(4),groupList);
-        setUpSportColumn(table, table.getColumnModel().getColumn(5),groupList);
+//        setUpSportColumn(table, table.getColumnModel().getColumn(3),groupList);
+//        setUpSportColumn(table, table.getColumnModel().getColumn(4),groupList);
+//        setUpSportColumn(table, table.getColumnModel().getColumn(5),groupList);
         //Add the scroll pane to this panel.
         add(scrollPane);
-        initializeButton();
+//        initializeButton();
         
 //        data.add(new Contacter("yap", "123456", new ArrayList<String>(), 10));
     }
@@ -225,7 +227,7 @@ public class ContactTable extends JPanel {
 	private ArrayList<Contacter> getData() {
     	try {
 //			ContactDatabaseAdapter.setUp();
-			return ContactDatabaseAdapter.getContacterList();
+			return ContactDatabaseAdapter.getContacterList(groupId);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return new ArrayList<Contacter>();
@@ -247,7 +249,7 @@ public class ContactTable extends JPanel {
         TableCellRenderer headerRenderer =
             table.getTableHeader().getDefaultRenderer();
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             column = table.getColumnModel().getColumn(i);
 
             comp = headerRenderer.getTableCellRendererComponent(
@@ -301,12 +303,9 @@ public class ContactTable extends JPanel {
 //                                        "# of Years",
 //                                        "Vegetarian"};
     	  private String[] columnNames
-    	  = {"id",
+    	  = {ContactEntry._ID,
                   "姓名",
                   "电话",
-                  "#群组一",
-                  "#群组二",
-                  "#群组三"
     	   };
     	  private ArrayList<Contacter> data;
 //        private Object[][] data = {
@@ -341,14 +340,9 @@ public class ContactTable extends JPanel {
         }
 
         public Object getValueAt(int row, int col) {
-        	if(row>=data.size())
-          	   return "";
-            Contacter contacter=data.get(row);
-        	ArrayList<String> groupList=contacter.groupList;
-        	String[] groups=new String[]{"","",""};
-        	final int size=Math.min(3, groupList.size());
-        	for(int i=0;i<size;i++)
-        		groups[i]=groupList.get(i);
+           if(row>=data.size())
+        	   return "";
+        	Contacter contacter=data.get(row);
             switch(col){
             case 0:
             	return contacter.id;
@@ -356,12 +350,6 @@ public class ContactTable extends JPanel {
             	return contacter.name;
             case 2:
             	return contacter.phone;
-            case 3:
-            	return groups[0];
-            case 4:
-            	return groups[1];
-            case 5:
-            	return groups[2];
             }
             return "";
         }
@@ -402,28 +390,12 @@ public class ContactTable extends JPanel {
                                    + value.getClass() + ")");
             }
             Contacter contacter=data.get(row);
-            ArrayList<String> list=data.get(row).groupList;
             switch(col){
             case 1:
             	contacter.name=value.toString();
-            	 fireTableCellUpdated(row, col);
             	break;
             case 2:
             	contacter.phone=value.toString();
-            	 fireTableCellUpdated(row, col);
-            	break;
-            case 3:   
-            	handleChangeGroup(value, row,col, list);
-            	fireTableDataChanged();
-            	break;
-            case 4:
-            case 5:
-            	if(!"".equals(getValueAt(row, col-1))){
-            		handleChangeGroup(value, row,col, list);
-            		fireTableDataChanged();
-            	}
-           
-            	
             	break;
             	default:
             		break;
@@ -436,19 +408,19 @@ public class ContactTable extends JPanel {
             }
         }
 
-		private void handleChangeGroup(Object value, int row,int col,
-				ArrayList<String> list) {
-			if("".equals(value.toString())){
-				if(col-3<list.size())
-					list.remove(col-3);
-			}else  if(!list.contains(value)){
-				if(col-3>=list.size())
-						list.add(col-3, value.toString());
-				else{
-					list.set(col-3, value.toString());
-				}
-			}
-		}
+//		private void handleChangeGroup(Object value, int row,int col,
+//				ArrayList<String> list) {
+//			if("".equals(value.toString())){
+//				if(col-3<list.size())
+//					list.remove(col-3);
+//			}else  if(!list.contains(value)){
+//				if(col-3>=list.size())
+//						list.add(col-3, value.toString());
+//				else{
+//					list.set(col-3, value.toString());
+//				}
+//			}
+//		}
 
         private void printDebugData() {
 //            int numRows = getRowCount();
@@ -465,20 +437,23 @@ public class ContactTable extends JPanel {
 //        }
     }
     }
-
+    private String groupName;
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from the
      * event-dispatching thread.
+     * @throws SQLException 
      */
-    public static void createAndShowGUI(JFrame parent) {
+    public static void createAndShowGUI(JFrame parent,long groupId) throws SQLException {
         //Create and set up the window.
         JFrame frame = new JFrame("TableRenderDemo");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         if(parent!=null)
         frame.setLocationRelativeTo(parent);
+        String groupName=ContactDatabaseAdapter.getGroupName(groupId);
+        frame.setTitle("群组 :"+ groupName);
         //Create and set up the content pane.
-        ContactTable newContentPane = new ContactTable();
+        GroupDetail newContentPane = new GroupDetail(groupId,groupName);
         newContentPane.setOpaque(true); //content panes must be opaque
         frame.setContentPane(newContentPane);
 
@@ -492,7 +467,11 @@ public class ContactTable extends JPanel {
         //creating and showing this application's GUI.
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                createAndShowGUI(null);
+                try {
+					createAndShowGUI(null,2);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
             }
         });
     }

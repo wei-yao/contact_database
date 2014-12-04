@@ -188,6 +188,8 @@ public class GroupTable extends JPanel {
 			}
 			
 			public void mouseClicked(MouseEvent e) {
+				if (table.isEditing())
+				    table.getCellEditor().stopCellEditing();
 				int selectRow =table.getSelectedRow();
 				if(selectRow!=-1){
 					System.out.println("delete row "+selectRow );
@@ -212,6 +214,7 @@ public class GroupTable extends JPanel {
 			
 			public void mouseClicked(MouseEvent e) {
 				try {
+					stopEdit();
 					ContactDatabaseAdapter.CommitGroupChange(data);
 					data.clear();
 					data.addAll(ContactDatabaseAdapter.getGroupData());
@@ -220,6 +223,13 @@ public class GroupTable extends JPanel {
 					e1.printStackTrace();
 					System.out.println("–¥»Î ß∞‹");
 				}
+			}
+/**
+ * Õ£÷π±‡º≠,–¥»Î±‡º≠µƒ÷µ.
+ */
+			private void stopEdit() {
+				if (table.isEditing())
+				    table.getCellEditor().stopCellEditing();
 			}
 		});
         cancelEdit.addMouseListener(new MouseListener() {
@@ -237,6 +247,8 @@ public class GroupTable extends JPanel {
 			}
 			
 			public void mouseClicked(MouseEvent e) {
+				if (table.isEditing())
+				    table.getCellEditor().stopCellEditing();
 				data.clear();
 				try {
 					data.addAll(ContactDatabaseAdapter.getGroupData());
